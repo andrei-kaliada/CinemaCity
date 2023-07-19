@@ -1,3 +1,5 @@
+const prettierConfig = require('./.prettierrc.js')
+
 module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
@@ -13,5 +15,5 @@ module.exports = {
     jest: true,
   },
   ignorePatterns: ['.eslintrc.js'],
-  rules: {'no-console': 1, 'prettier/prettier': 0},
+  rules: {'no-console': 1, 'prettier/prettier': 0}, 
 };
