@@ -15,7 +15,7 @@ import { JwtStrategy } from './strategies/jwt.strategy'
     JwtModule.registerAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
-      useFactory: getJWTConfig
+      useFactory: getJWTConfig,
     }),
     TypegooseModule.forFeature([
       {

@@ -5,7 +5,8 @@ import { AppController } from './app.controller'
 import { AppService } from './app.service'
 import { AuthModule } from './auth/auth.module'
 import { getMongoDbConfig } from './config/mongo.config'
-import { UserModule } from './user/user.module';
+import { UserModule } from './user/user.module'
+import { GenreModule } from './genre/genre.module';
 
 @Module({
   imports: [
@@ -17,6 +18,7 @@ import { UserModule } from './user/user.module';
     }),
     AuthModule,
     UserModule,
+    GenreModule,
   ],
   controllers: [AppController],
   providers: [AppService],
