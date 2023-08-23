@@ -1,10 +1,11 @@
 import {
-	ForbiddenException,
-	Injectable,
-	NotFoundException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common'
 import { ModelType } from '@typegoose/typegoose/lib/types'
 import { genSalt, hash } from 'bcrypt'
+import { Types } from 'mongoose'
 import { InjectModel } from 'nestjs-typegoose'
 import { UpdateUserDto } from './dto/update-user.dto'
 import { UserModel } from './entity/user.model'
@@ -38,7 +39,10 @@ export class UserService {
   }
 
   async findUserById(_id: string) {
-    const findUser = await this.userModel.findById(_id).select('-password -updatedAt -__v').exec()
+    const findUser = await this.userModel
+      .findById(_id)
+      .select('-password -updatedAt -__v')
+      .exec()
     if (!findUser) throw new ForbiddenException('User not found')
 
     return findUser
@@ -85,6 +89,51 @@ export class UserService {
       _id: user._id,
       email: user.email,
       isAdmin: user.isAdmin,
+    }
+  }
+
+  async toggleFavoriteMovie(userId: string, movieId: Types.ObjectId) {
+    try {
+      const user = await this.findUserById(userId)
+
+      if (!user) throw new ForbiddenException('User was not found')
+
+      if (user.favorites.includes(movieId)) {
+        const favorite = user.favorites.filter(
+          (item) => item.toString() !== movieId.toString()
+        )
+        user.favorites = favorite
+      } else {
+        user.favorites.push(movieId)
+      }
+
+      await user.save()
+
+      return user
+    } catch (error) {
+      throw new ForbiddenException(error.message)
+    }
+  }
+
+  async getFavoriteMovies(_id: Types.ObjectId) {
+    try {
+      const user = await this.userModel
+      .findById(_id, 'favorites')
+      .populate({
+        path: 'favorites',
+        populate: {
+          path: 'genres'
+        }
+      })
+      .exec();
+
+    if (!user) {
+      throw new NotFoundException('User not found');
+    }
+
+    return user.favorites;
+    } catch (error) {
+      throw new ForbiddenException(error.message)
     }
   }
 }
