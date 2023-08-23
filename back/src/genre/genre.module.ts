@@ -18,6 +18,6 @@ import { GenreService } from './genre.service'
     ConfigModule,
   ],
   providers: [GenreService],
-  controllers: [GenreController]
+  controllers: [GenreController],
 })
 export class GenreModule {}

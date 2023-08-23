@@ -7,97 +7,102 @@ import { GenreModel } from './entity/genre.model'
 
 @Injectable()
 export class GenreService {
-	constructor(@InjectModel(GenreModel) private readonly genreModel: ModelType<GenreModel>){}
+  constructor(
+    @InjectModel(GenreModel) private readonly genreModel: ModelType<GenreModel>
+  ) {}
 
-	async getAllGenre(searchTerm?: string){
-		try {
-			let options = {};
-			
-			if(searchTerm){
-				options = {
-					$or: [
-						{ name: {$regex: searchTerm, $options:'i'}},
-						{ slug: {$regex: searchTerm, $options:'i'}},
-						{ description: {$regex: searchTerm, $options:'i'}},
-					]
-				}
-			}
+  async getAllGenre(searchTerm?: string) {
+    try {
+      let options = {}
 
-			const data = await this.genreModel.find(options).select('-updatedAt -__v').sort({createdAt: 'desc'}).exec()
+      if (searchTerm) {
+        options = {
+          $or: [
+            { name: { $regex: searchTerm, $options: 'i' } },
+            { slug: { $regex: searchTerm, $options: 'i' } },
+            { description: { $regex: searchTerm, $options: 'i' } },
+          ],
+        }
+      }
 
-			if(!data) throw new ForbiddenException('Genre was not found')
+      const data = await this.genreModel
+        .find(options)
+        .select('-updatedAt -__v')
+        .sort({ createdAt: 'desc' })
+        .exec()
 
-			return data
-			
-		} catch (error) {
-			throw new ForbiddenException(error)
-		}
-	}
+      if (!data) throw new ForbiddenException('Genre was not found')
 
-	async getCollections(){
-		const genres = await this.getAllGenre()
-		const collections = genres
+      return data
+    } catch (error) {
+      throw new ForbiddenException(error)
+    }
+  }
 
-		return collections
-	}
+  async getCollections() {
+    const genres = await this.getAllGenre()
+    const collections = genres
 
-	async createGenre(){
-		const defaultTemplate: CreateGenreDto = {
-			name: '',
-			slug: '',
-			description: '',
-			icon: ''
-		} 
+    return collections
+  }
 
-		const data = await this.genreModel.create(defaultTemplate)
+  async createGenre() {
+    const defaultTemplate: CreateGenreDto = {
+      name: '',
+      slug: '',
+      description: '',
+      icon: '',
+    }
 
-		return data._id
-	}
+    const data = await this.genreModel.create(defaultTemplate)
 
-	async findBySlug(slug: string){
-		try {
-			const data = await this.genreModel.findOne({slug}).exec()
-			if(!data) throw new ForbiddenException('Slug was not found')
-		} catch (error) {
-			throw new ForbiddenException(error)
-		}
-	}
+    return data._id
+  }
 
-	async finById(id: string) {
-		try {
-			const data = await this.genreModel.findById(id)
-		if(!data) throw new ForbiddenException('Genre with this id was not found')
+  async findBySlug(slug: string) {
+    try {
+      const data = await this.genreModel.findOne({ slug }).exec()
+      if (!data) throw new ForbiddenException('Slug was not found')
+      return data
+    } catch (error) {
+      throw new ForbiddenException(error)
+    }
+  }
 
-		return data
-		} catch (error) {
-			throw new ForbiddenException(error)
-		}
-	}
+  async finById(id: string) {
+    try {
+      const data = await this.genreModel.findById(id)
+      if (!data)
+        throw new ForbiddenException('Genre with this id was not found')
 
-	async updateGenre(id: string, updateDto: UpdateGenreDto){
-		try {
-			const genre = await this.genreModel.findByIdAndUpdate({_id: id}, {...updateDto}, {new: true}).select('-updatedAt -__v')
+      return data
+    } catch (error) {
+      throw new ForbiddenException(error)
+    }
+  }
 
-		if(!genre) throw new ForbiddenException(`genre not found`)
+  async updateGenre(id: string, updateDto: UpdateGenreDto) {
+    try {
+      const genre = await this.genreModel
+        .findByIdAndUpdate({ _id: id }, { ...updateDto }, { new: true })
+        .select('-updatedAt -__v')
 
-		return genre
+      if (!genre) throw new ForbiddenException(`genre not found`)
 
-		} catch (error) {
-			throw new ForbiddenException(error)
-		}
+      return genre
+    } catch (error) {
+      throw new ForbiddenException(error)
+    }
+  }
 
-	}
-
-	async deleteGenre(genreId: string){
-		try {
-			const data = await this.genreModel.findByIdAndDelete({_id: genreId})
-			if(!data) throw new ForbiddenException('Genre with this id was not found')
-			return data
-		} catch (error) {
-			throw new ForbiddenException(error)
-			
-		}
-	}
-
-	
+  async deleteGenre(genreId: string) {
+    try {
+      const data = await this.genreModel.findByIdAndDelete({ _id: genreId })
+      if (!data)
+        throw new ForbiddenException('Genre with this id was not found')
+      return data
+    } catch (error) {
+      throw new ForbiddenException(error)
+    }
+  }
 }
