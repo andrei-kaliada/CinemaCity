@@ -32,7 +32,7 @@ export class MovieService {
 
       return data
     } catch (error) {
-      throw new ForbiddenException(error)
+      throw new ForbiddenException(error.message)
     }
   }
 
@@ -67,14 +67,13 @@ export class MovieService {
       if (!data) throw new ForbiddenException('Slug was not found')
       return data
     } catch (error) {
-      throw new ForbiddenException(error)
+      throw new ForbiddenException(error.message)
     }
   }
 
   async findByActorId(actorId: Types.ObjectId) {
     try {
       const data = await this.movieModel.find({ actors: actorId }).exec()
-      console.log('DATA:', data)
       if (!data || !data.length)
         throw new ForbiddenException('Movies was not found')
       return data
@@ -132,7 +131,7 @@ export class MovieService {
 
       return data
     } catch (error) {
-      throw new ForbiddenException(error)
+      throw new ForbiddenException(error.message)
     }
   }
 
@@ -147,7 +146,7 @@ export class MovieService {
 
       return genre
     } catch (error) {
-      throw new ForbiddenException(error)
+      throw new ForbiddenException(error.message)
     }
   }
 
@@ -158,7 +157,21 @@ export class MovieService {
         throw new ForbiddenException('Movie with this id was not found')
       return data
     } catch (error) {
-      throw new ForbiddenException(error)
+      throw new ForbiddenException(error.message)
+    }
+  }
+
+  async updateAverageRating(rating: number, movieId: Types.ObjectId){
+    try {
+
+      const data = await this.movieModel.findByIdAndUpdate({_id: movieId}, {rating}, {new: true})
+
+      if(!data) throw new ForbiddenException('Movie with this id was not found')
+
+      return data
+    } catch (error) {
+      throw new ForbiddenException(error.message)
+      
     }
   }
 }
