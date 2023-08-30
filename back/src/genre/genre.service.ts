@@ -1,14 +1,17 @@
 import { ForbiddenException, Injectable } from '@nestjs/common'
 import { ModelType } from '@typegoose/typegoose/lib/types'
 import { InjectModel } from 'nestjs-typegoose'
+import { MovieService } from 'src/movie/movie.service'
 import { CreateGenreDto } from './dto/create-genre.dto'
 import { UpdateGenreDto } from './dto/update-genre.dto'
 import { GenreModel } from './entity/genre.model'
+import { ICollection } from './genre.interface'
 
 @Injectable()
 export class GenreService {
   constructor(
-    @InjectModel(GenreModel) private readonly genreModel: ModelType<GenreModel>
+    @InjectModel(GenreModel) private readonly genreModel: ModelType<GenreModel>,
+    private readonly movieService: MovieService
   ) {}
 
   async getAllGenre(searchTerm?: string) {
@@ -41,7 +44,18 @@ export class GenreService {
 
   async getCollections() {
     const genres = await this.getAllGenre()
-    const collections = genres
+    const collections = Promise.all(genres.map( async genre => {
+      const moviesByGenre = await this.movieService.findByGenreIds([genre.id])
+
+      const result: ICollection = {
+        _id: String(genre.id),
+        image: moviesByGenre[0].bigPoster,
+        title: genre.name,
+        slug: genre.slug
+      }
+
+      return result
+    }))
 
     return collections
   }

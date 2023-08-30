@@ -2,13 +2,15 @@ import { ForbiddenException, Injectable } from '@nestjs/common'
 import { ModelType } from '@typegoose/typegoose/lib/types'
 import { Types } from 'mongoose'
 import { InjectModel } from 'nestjs-typegoose'
+import { TelegramService } from 'src/telegram/telegram.service'
 import { CreateMovieDto } from './dto/create-movie.dto'
 import { MovieModel } from './entity/movie.model'
 
 @Injectable()
 export class MovieService {
   constructor(
-    @InjectModel(MovieModel) private readonly movieModel: ModelType<MovieModel>
+    @InjectModel(MovieModel) private readonly movieModel: ModelType<MovieModel>,
+    private readonly telegramService: TelegramService
   ) {}
 
   async getAll(searchTerm?: string) {
@@ -137,6 +139,11 @@ export class MovieService {
 
   async update(id: string, updateDto: CreateMovieDto) {
     try {
+      if(!updateDto.isSendTelegram){
+        await this.sendNotification(updateDto)
+        updateDto.isSendTelegram = true
+      }
+
       const genre = await this.movieModel
         .findByIdAndUpdate({ _id: id }, { ...updateDto }, { new: true })
         .populate('genres actors')
@@ -173,5 +180,27 @@ export class MovieService {
       throw new ForbiddenException(error.message)
       
     }
+  }
+
+  async sendNotification(dto: CreateMovieDto){
+    // if(process.env.NODE_ENV !== 'development') {
+    //   this.telegramService.sendPhoto(dto.poster)
+    // }
+      await this.telegramService.sendPhoto('https://flxt.tmsimg.com/assets/p170977_p_v7_ae.jpg')
+
+      const msg = `<b>${dto.title}</b>`
+
+      await this.telegramService.sendMessage(msg, {
+        reply_markup: {
+          inline_keyboard: [
+            [
+              {
+                url: 'https://www.rottentomatoes.com/m/i_am_legend',
+                text: 'Go to watch'
+              }
+            ],
+          ]
+        }
+      })
   }
 }
