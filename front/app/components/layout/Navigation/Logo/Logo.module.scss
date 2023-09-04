@@ -1,0 +1,7 @@
+.logo {
+  @apply inline-flex items-center text-2lg;
+
+  &__title {
+    @apply uppercase text-white ml-[5px] font-bold block;
+  }
+}
